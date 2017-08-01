@@ -1,0 +1,111 @@
+--- 
+# Download and install EPEL for Centos/RHEL version 7
+- name: Download EPEL Repo - Centos/RHEL 7
+  get_url: url=http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm dest=/tmp/epel-release-latest-7.noarch.rpm
+  
+# Installation of EPEL Repo
+- name: Install EPEL Repo - Centos/RHEL 7
+  command: rpm -ivh /tmp/epel-release-latest-7.noarch.rpm creates=/etc/yum.repos.d/epel.repo
+
+#Installation of python-pip
+- name: install python-pip
+  yum:
+    name: python-pip
+    state: present
+
+#Installation of httplib2 for URI module
+- name: install http library
+  pip: 
+    name: httplib2
+    state: present
+
+#Installation of httpd
+- name : Install http server
+  yum:
+    name: httpd
+    state: present
+
+#Starting the httpd service
+- name : Making sure Http server is runnning
+  service: 
+    name: httpd
+    state: started
+
+#Installation of mod_ssl for apache http server
+- name: Installing mod_ssl 
+  yum:
+    name: mod_ssl
+    state: present
+
+#Installation of openssl for apache http server
+- name: Installing openssl
+  yum:
+    name: openssl
+    state: present
+
+#Installation of firewall
+- name: install firewall
+  yum: 
+    name: firewalld
+    state: present
+
+#Start firewall service
+- name: start firewalld
+  service: 
+    name: firewalld
+    state: started
+
+#copy file from template to destination
+- name: copy html file to http server
+  template:
+    src: index.html
+    dest: /var/www/html/index.html
+
+#Generate ca.key
+- name: Generate RSA key
+  shell: openssl genrsa -out {{ ssl_certs_privkey_path }} {{ ssl_certs_key_size }}
+
+#Generate ca.csr
+- name: Generate CSR
+  command: openssl req -new -sha256 -subj "{{ ssl_certs_fields }}" -key {{ ssl_certs_privkey_path }} -out {{ ssl_certs_csr_path }}
+
+#Generate ca.crt
+- name: Generate self-signed SSL certificate
+  command: openssl x509 -req -days {{ ssl_certs_days }} -in {{ ssl_certs_csr_path }} -signkey {{ ssl_certs_privkey_path }} -out {{ ssl_certs_cert_path }}
+ 
+#copy configured ssl.conf to the destination 
+- name: copy ssl.conf file 
+  template:
+    src: ssl.conf
+    dest: /etc/httpd/conf.d/ssl.conf
+
+#copy configured httpd.conf to the destination
+- name: copy httpd.conf file 
+  template:
+    src: httpd.conf
+    dest: /etc/httpd/conf/httpd.conf
+  
+#Applying firewall rule 
+- name: insert firewalld rule for http port
+  firewalld: 
+    port: "{{ http_port }}/tcp"
+    permanent: true 
+    state: enabled 
+    immediate: yes
+
+#Assign the httpd secured port
+- name: insert firewalld rule for https port
+  firewalld: 
+    port: "{{ https_port }}/tcp"
+    permanent: true 
+    state: enabled 
+    immediate: yes
+
+#Restart httpd service
+- name: restart http server
+  service: 
+    name: httpd
+    state: restarted
+
+
+  

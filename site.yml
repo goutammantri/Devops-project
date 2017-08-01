@@ -1,0 +1,10 @@
+---
+#start the webserver installation
+- name: install httpd server
+  hosts: all
+  become: yes
+  become_method: sudo
+  
+  roles:
+    - install&conf_webserver
+    - testcases

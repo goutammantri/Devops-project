@@ -1,0 +1,10 @@
+---
+# Gathering the facts from the webserver home page
+- name: testing whether the http server on http_port
+  action: uri url={{ ip_address }} return_content=yes
+  register: webpage
+
+# Displays a fail message if the webserver home page dosen't have a "apache" in it 
+- name: Display fail message if the webserver is not sucessfully installed
+  fail: msg='web application has not installed sucessfully'
+  when: "'World' not in webpage.content"
