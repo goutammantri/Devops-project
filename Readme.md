@@ -1,4 +1,4 @@
-#Here we are installing httpd server and generating self signed certificates to secure the httpd server. when the request is hit to port 80 it will redirect to 443 which is the secure port.
+#Here we are installing httpd server and generating self signed certificates to secure the httpd server. when the request is http it will run on port 80 if the request is https then it will run on port 443.
 
 
 httpd server
