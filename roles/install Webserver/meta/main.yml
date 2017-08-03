@@ -1,0 +1,13 @@
+Project_info:
+  author: Goutam Mantri
+  description: Install and manage a httpd server
+  company: N/A
+  license: N/A
+  min_ansible_version: 1.8
+  platforms:
+  - name: Redhat 
+    versions:
+    - 7
+    - 6
+categories:
+  - web
